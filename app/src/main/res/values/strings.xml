@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">BlueWorld Test</string>
+    <string name="activity_map_title">Map</string>
 </resources>
