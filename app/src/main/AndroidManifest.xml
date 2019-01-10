@@ -22,9 +22,8 @@
         </activity>
         <activity
             android:name=".mapTask.MapActivity"
-            android:label="@string/activity_map_title">
-
-        </activity>
+            android:label="@string/activity_map_title"></activity>
+        <activity android:name=".weatherTask.WeatherActivity"></activity>
     </application>
 
 </manifest>

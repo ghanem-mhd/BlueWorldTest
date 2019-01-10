@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.example.mhd_ghanem.blueworldtest.mapTask.MapActivity;
+import com.example.mhd_ghanem.blueworldtest.weatherTask.WeatherActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,5 +18,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void openMapActivity(View view) {
         MapActivity.open(this);
+    }
+
+    public void openWeatherActivity(View view) {
+        WeatherActivity.open(this);
     }
 }
