@@ -36,6 +36,20 @@ public class ForecastItem {
         weatherConditions.add(weatherCondition);
     }
 
+    public String getWeatherConditionIcon(){
+        if (weatherConditions != null && weatherConditions.size() > 0){
+            return weatherConditions.get(0).getIcon();
+        }
+        return "";
+    }
+
+    public String getWeatherConditionDescription(){
+        if (weatherConditions != null && weatherConditions.size() > 0){
+            return weatherConditions.get(0).getDescription();
+        }
+        return "";
+    }
+
     @Override
     public String toString() {
         return "ForecastItem{" +

@@ -1,6 +1,8 @@
 package com.example.mhd_ghanem.blueworldtest.models;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public class City {
@@ -9,7 +11,7 @@ public class City {
     private String name;
     private double lat;
     private double lon;
-    private CityForecast cityForecast;
+    private List<ForecastItem> forecastItems;
 
     public City(String id,String name, double lat, double lon) {
         this.id = id;
@@ -53,6 +55,14 @@ public class City {
         return cities;
     }
 
+    public static HashMap<String,City> getCitiesAsMap(){
+        HashMap<String,City> cities = new HashMap<>();
+        for (City city:getCities()){
+            cities.put(city.getId(),city);
+        }
+        return cities;
+    }
+
     public String getId() {
         return id;
     }
@@ -61,11 +71,12 @@ public class City {
         this.id = id;
     }
 
-    public CityForecast getCityForecast() {
-        return cityForecast;
+
+    public List<ForecastItem> getForecastItems() {
+        return forecastItems;
     }
 
-    public void setCityForecast(CityForecast cityForecast) {
-        this.cityForecast = cityForecast;
+    public void setForecastItems(List<ForecastItem> forecastItems) {
+        this.forecastItems = forecastItems;
     }
 }

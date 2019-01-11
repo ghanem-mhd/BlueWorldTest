@@ -4,6 +4,8 @@ import android.app.Application;
 
 import com.androidnetworking.AndroidNetworking;
 
+import net.danlew.android.joda.JodaTimeAndroid;
+
 
 public class App extends Application {
 
@@ -11,5 +13,6 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         AndroidNetworking.initialize(getApplicationContext());
+        JodaTimeAndroid.init(this);
     }
 }

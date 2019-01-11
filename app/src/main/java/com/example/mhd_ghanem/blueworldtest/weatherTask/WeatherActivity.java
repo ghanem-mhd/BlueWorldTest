@@ -2,48 +2,94 @@ package com.example.mhd_ghanem.blueworldtest.weatherTask;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.example.mhd_ghanem.blueworldtest.R;
 import com.example.mhd_ghanem.blueworldtest.models.City;
 import com.example.mhd_ghanem.blueworldtest.models.CityForecast;
+import com.example.mhd_ghanem.blueworldtest.models.ForecastItem;
 import com.example.mhd_ghanem.blueworldtest.network_adapter.WeatherRequests;
+import com.example.mhd_ghanem.blueworldtest.utilities.DateManager;
+import com.example.mhd_ghanem.blueworldtest.weatherTask.adapters.WeatherCitiesAdapter;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 
-public class WeatherActivity extends AppCompatActivity implements WeatherRequests.WeatherRequestsInterface {
+public class WeatherActivity extends AppCompatActivity implements WeatherRequests.WeatherRequestsInterface, View.OnClickListener {
 
     private static final String TAG = WeatherActivity.class.getSimpleName();
-    private List<City> cities = City.getCities();
-    private CompositeDisposable compositeDisposable;
+    private Map<String,City> cities = City.getCitiesAsMap();
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private RecyclerView citiesRecyclerView;
+    private ProgressBar progressBar;
+    private TextView errorTextView;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
 
-        compositeDisposable = new CompositeDisposable();
+        findViews();
 
         setupToolbar();
 
+        setUpRecyclerView();
+
         getCitiesForecast();
+    }
 
+    private void findViews() {
+        citiesRecyclerView = findViewById(R.id.activity_weather_cities_rv);
+        progressBar = findViewById(R.id.activity_weather_loading_pb);
+        errorTextView = findViewById(R.id.activity_weather_error_tv);
 
+        errorTextView.setOnClickListener(this);
     }
 
     private void getCitiesForecast() {
-        List<String> citiesIDs = new ArrayList<>();
-        for (City city:cities){
-            citiesIDs.add(city.getId());
+        progressBar.setVisibility(View.VISIBLE);
+        errorTextView.setVisibility(View.GONE);
+        citiesRecyclerView.setVisibility(View.GONE);
+
+        compositeDisposable.add(WeatherRequests.getForeCastMultipleCities(this,cities.keySet(),this));
+    }
+
+    @Override
+    public void onSuccess(List<CityForecast> citiesForecast) {
+        progressBar.setVisibility(View.GONE);
+        citiesRecyclerView.setVisibility(View.VISIBLE);
+
+        for (CityForecast cityForecast:citiesForecast){
+            City city = cities.get(cityForecast.getCityID());
+            if (city != null){
+                List<ForecastItem> nextDateForecast = ForecastManager.getNextDayForecast(cityForecast.getForecastItems());
+                city.setForecastItems(nextDateForecast);
+            }
         }
-        compositeDisposable.add(WeatherRequests.getForeCastMultipleCities(this,citiesIDs,this));
+
+        WeatherCitiesAdapter weatherCitiesAdapter = ((WeatherCitiesAdapter) citiesRecyclerView.getAdapter());
+        if (weatherCitiesAdapter != null){
+            weatherCitiesAdapter.setItemsData(cities.values());
+        }
+    }
+
+    @Override
+    public void onError(Throwable e) {
+        progressBar.setVisibility(View.GONE);
+        errorTextView.setVisibility(View.VISIBLE);
     }
 
     public static void open(Context context) {
@@ -56,6 +102,7 @@ public class WeatherActivity extends AppCompatActivity implements WeatherRequest
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle("Tomorrow, " + DateManager.getTomorrowAsDateMonth());
         }
     }
 
@@ -75,13 +122,19 @@ public class WeatherActivity extends AppCompatActivity implements WeatherRequest
         compositeDisposable.dispose();
     }
 
-    @Override
-    public void onSuccess(List<CityForecast> citiesForecasts) {
-        System.out.println("WeatherActivity.onSuccess " + citiesForecasts);
+    private void setUpRecyclerView() {
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        WeatherCitiesAdapter weatherCitiesAdapter = new WeatherCitiesAdapter(this);
+
+        citiesRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        citiesRecyclerView.setLayoutManager(linearLayoutManager);
+        citiesRecyclerView.setAdapter(weatherCitiesAdapter);
     }
 
     @Override
-    public void onError(Throwable e) {
-
+    public void onClick(View v) {
+        if (v == errorTextView){
+            getCitiesForecast();
+        }
     }
 }
